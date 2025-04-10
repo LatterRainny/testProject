@@ -39,18 +39,23 @@ public class AdminOrderControllerTest {
 
     @Test
     public void testReservationManage() throws Exception {
-        List<Order> orders = Collections.emptyList();
+        Order order1 = new Order();
+        Order order2 = new Order();
+        OrderVo orderVo1 = new OrderVo();
+        OrderVo orderVo2 = new OrderVo();
+        List<Order> orders = Arrays.asList(order1, order2);
+        List<OrderVo> orderVos = Arrays.asList(orderVo1, orderVo2);
         Page<Order> orderPage = new PageImpl<>(orders);
 
         when(orderService.findAuditOrder()).thenReturn(orders);
         when(orderService.findNoAuditOrder(any(Pageable.class))).thenReturn(orderPage);
-        when(orderVoService.returnVo(any())).thenReturn(Collections.emptyList());
+        when(orderVoService.returnVo(any())).thenReturn(orderVos);
 
         mockMvc.perform(get("/reservation_manage"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/reservation_manage"))
-                .andExpect(model().attributeExists("total"))
-                .andExpect(model().attributeExists("order_list"));
+                .andExpect(model().attribute("total", 1))
+                .andExpect(model().attribute("order_list", hasSize(2)));
 
         verify(orderService, times(1)).findAuditOrder();
         verify(orderService, times(1)).findNoAuditOrder(any(Pageable.class));

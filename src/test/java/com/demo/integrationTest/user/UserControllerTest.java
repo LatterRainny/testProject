@@ -40,7 +40,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testLoginCheckSuccess() throws Exception {
+    public void testLoginCheckUserSuccess() throws Exception {
         User user = new User();
         user.setIsadmin(0);
         when(userService.checkLogin(any(), any())).thenReturn(user);
@@ -50,6 +50,33 @@ public class UserControllerTest {
                         .param("password", "123456"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("/index"));
+
+        verify(userService, times(1)).checkLogin("test", "123456");
+    }
+
+    @Test
+    public void testLoginCheckAdminSuccess() throws Exception {
+        User user = new User();
+        user.setIsadmin(1);
+        when(userService.checkLogin(any(), any())).thenReturn(user);
+
+        mockMvc.perform(post("/loginCheck.do")
+                        .param("userID", "test")
+                        .param("password", "123456"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("/admin_index"));
+
+        verify(userService, times(1)).checkLogin("test", "123456");
+    }
+
+    @Test
+    public void testLoginCheckFail() throws Exception {
+        when(userService.checkLogin(any(), any())).thenReturn(null);
+        mockMvc.perform(post("/loginCheck.do")
+                        .param("userID", "test")
+                        .param("password", "123456"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("false"));
     }
 
     @Test

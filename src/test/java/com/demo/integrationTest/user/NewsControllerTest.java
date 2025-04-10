@@ -13,8 +13,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
+import static javax.management.Query.value;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,27 +38,41 @@ public class NewsControllerTest {
         mockMvc.perform(get("/news")
                         .param("newsID", "1"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("news"));
+                .andExpect(view().name("news"))
+                .andExpect(model().attribute("news", news));
+
+        verify(newsService, times(1)).findById(1);
     }
 
     @Test
     public void testNewsListPage() throws Exception {
-        Page<News> page = new PageImpl<>(Collections.singletonList(new News()));
+        News news = new News();
+        news.setNewsID(1);
+        Page<News> page = new PageImpl<>(Collections.singletonList(news));
         when(newsService.findAll(any())).thenReturn(page);
 
         mockMvc.perform(get("/news_list"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("news_list"));
+                .andExpect(view().name("news_list"))
+                .andExpect(jsonPath("$").exists())
+                .andExpect(model().attribute("news_list", hasSize(1)))
+                .andExpect(model().attribute("total", 1));
+
+        verify(newsService, times(2)).findAll(any());
     }
 
     @Test
     public void testGetNewsList() throws Exception {
-        Page<News> page = new PageImpl<>(Collections.singletonList(new News()));
+        News news = new News();
+        news.setNewsID(1);
+        Page<News> page = new PageImpl<>(Collections.singletonList(news));
         when(newsService.findAll(any())).thenReturn(page);
 
         mockMvc.perform(get("/news/getNewsList")
                         .param("page", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
+
+        verify(newsService, times(1)).findAll(any());
     }
 }

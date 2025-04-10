@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -108,7 +109,7 @@ public class AdminMessageControllerTest {
 
     @Test
     public void testPassMessage() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/passMessage.do")
+        mockMvc.perform(post("/passMessage.do")
                         .param("messageID", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(true));
@@ -116,7 +117,7 @@ public class AdminMessageControllerTest {
 
     @Test
     public void testRejectMessage() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/rejectMessage.do")
+        mockMvc.perform(post("/rejectMessage.do")
                         .param("messageID", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(true));
@@ -124,7 +125,7 @@ public class AdminMessageControllerTest {
 
     @Test
     public void testDelMessage() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/delMessage.do")
+        mockMvc.perform(post("/delMessage.do")
                         .param("messageID", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(true));

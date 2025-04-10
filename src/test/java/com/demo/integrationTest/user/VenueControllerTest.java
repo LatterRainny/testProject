@@ -9,12 +9,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -42,11 +44,14 @@ public class VenueControllerTest {
     @Test
     public void testVenueListPage() throws Exception {
         Page<Venue> page = new PageImpl<>(Collections.singletonList(new Venue()));
-        when(venueService.findAll(any())).thenReturn(page);
+        when(venueService.findAll(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/venue_list"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("venue_list"));
+                .andExpect(view().name("venue_list"))
+                .andExpect(model().attribute("total", 1));
+
+        verify(venueService, times(2)).findAll(any(Pageable.class));
     }
 
     @Test
@@ -58,5 +63,7 @@ public class VenueControllerTest {
                         .param("page", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists());
+
+        verify(venueService, times(1)).findAll(any());
     }
 }

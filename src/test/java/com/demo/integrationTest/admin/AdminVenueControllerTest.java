@@ -13,8 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,6 +37,8 @@ public class AdminVenueControllerTest {
         mockMvc.perform(get("/venue_manage"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/venue_manage"));
+
+        verify(venueService, times(1)).findAll(any());
     }
 
     @Test
@@ -47,6 +50,8 @@ public class AdminVenueControllerTest {
                         .param("venueID", "1"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("/admin/venue_edit"));
+
+        verify(venueService, times(1)).findByVenueID(1);
     }
 
     @Test
@@ -64,7 +69,9 @@ public class AdminVenueControllerTest {
         mockMvc.perform(get("/venueList.do")
                         .param("page", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$", hasSize(1)));
+        verify(venueService, times(1)).findAll(any());
     }
 
     @Test
@@ -75,6 +82,18 @@ public class AdminVenueControllerTest {
                         .param("venueName", "test"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(true));
+
+        verify(venueService, times(1)).countVenueName("test");
+    }
+
+    @Test
+    public void testCheckVenueNameExist() throws Exception {
+        when(venueService.countVenueName("test")).thenReturn(1);
+        mockMvc.perform(post("/checkVenueName.do")
+                        .param("venueName", "test"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(false));
+        verify(venueService, times(1)).countVenueName("test");
     }
 
     @Test
